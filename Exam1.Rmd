@@ -1,0 +1,210 @@
+---
+title: "Project 1: Powerball, Personality, and the Planet"
+author: "Joe Paxton and Kyle Rhoads"
+date: "03/02/2015"
+output: html_document
+---
+
+```{r, echo = FALSE}
+LotteryPowerballA <- read.csv(file = url("http://www1.appstate.edu/~thomleyje/R-datafiles/LotteryPowerballA.csv"))
+PersonalitySTT3850 <- read.csv(file = url("http://www1.appstate.edu/~thomleyje/R-datafiles/PersonalitySTT3850.csv"))
+PersonalitySTT1810 <- read.csv(file = url("http://www1.appstate.edu/~thomleyje/R-datafiles/PersonalitySTT1810.csv"))
+MaunaLoaCO2 <- read.csv(file = url("http://www1.appstate.edu/~thomleyje/R-datafiles/MaunaLoaCO2.csv"))
+```
+
+***
+## Problem 1
+***
+
+a) **Simulate drawing a standard Powerball lottery number, using R's sample and seq commands.**
+
+```{r}
+whiteball <- sample(59,5)
+powerball <- sample(35,1)
+```
+
+So, our drawing was `r whiteball` for the white numbers, and `r powerball` for the powerball.
+
+b) **If I purchase a single Powerball lottery ticket, what is the chance I will win the next Jackpot?**
+
+```{r}
+1 / (choose(59, 5) * choose(35,1))
+```
+
+There is a `r 1 / (choose(59, 5) * choose(35,1)) * 100`% of winning each time.
+
+c) **Suppose I buy one Powerball lottery ticket for every drawing, and I always choose the same set of numbers (6, 7, 8, 26, 28, with Powerball 29). A friend insists that my chances of winning would be better if I played a different set of numbers every time. Is he correct? Why or why not?**
+
+No, because each set of numbers has an equal chance of being drawn, and each instance is independent. The previous sets chosen don't affect the next, so each drawing you have the same likelihood of winning, regardless of the numbers you pick.
+
+d) **Before the upcoming Saturday's drawing, 70,089,404 unique number combinations are sold. What is the probability that someone from Saturday's pool of ticket holders will be able to claim the Jackpot?**
+
+```{r}
+70089404 / (choose(59, 5) * choose(35,1))
+```
+
+There is a `r 70089404 / (choose(59, 5) * choose(35,1)) * 100`% chance that someone will win.
+
+e) **Suppose exactly 70,089,404 unique number combinations will be sold for each Powerball Lottery drawing for several months in a row. Starting now, what is the probability that the first Jackpot will be won within three weeks (i.e., on or before the sixth consecutive drawing)?**
+
+```{r}
+dgeom(5, 0.4)
+```
+
+There is a `r pnbinom(5, 1, 0.4) * 100`% chance of getting the first jackpot in the first 6 weeks.
+
+f) **Suppose that the number of unique number combinations sold per drawing remains constant at 70,089,404. If we start counting at the first January drawing, how many drawings will be required on average for the company to reach its first three Jackpots payouts for the year? Use simulation with 10,000 repetitions to find the answer.**
+
+```{r}
+trials <- rnbinom(10000, 3, 0.4)
+mean(trials) + 3
+```
+
+It should take roughly `r round(mean(trials)) + 3` drawings to obtain three jackpots.
+
+g) **Suppose exactly 70,089,404 unique number combinations are sold for each Powerball Lottery drawing for an entire year (104 drawings). How many Jackpots should the company expect to pay out during that year?**
+
+```{r}
+104 * 0.4
+```
+
+The Lottery should expect to pay out roughly `r round(104 * 0.4)` jackpots.
+
+h) **In reality, the number of tickets sold for each drawing does not remain constant, as we assumed in (e)-(g). If a Jackpot is not awarded for a given drawing, the dollar value of the Jackpot increases for the next drawing and more people tend to buy tickets (source). How could you approach modeling/solving (f) for a variable number of ticket sales each drawing? For example, you would still have to make some assumptions--what might they be? You do not have to implement your solution; just discuss the general mathematical and/or programming algorithm you might use.**
+
+I would implement a variable representing the number of ticket sales, so that it could be changed for any given case. It would require also implementing a variable for the probability of someone winning, given that the probability would change each time the amount changes.
+
+***
+## Problem 2
+***
+
+a) **Create a histogram for the Powerball number, including labels that show how many observations are in each bin. Does the shape of the distribution support the idea that the red balls are all equally likely to be chosen? What evidence from the graph supports your answer? (Do not use the words "even" or "evenly" in your description--use more statistically descriptive terms.)**
+
+```{r}
+hist(LotteryPowerballA$Powerball, labels=T, xlab= "Powerball Number", ylim=c(0,100))
+```
+
+The historgram helps visualize that most of the red balls for each bin have an equal distribution. These uniform random variables can take values that are equally distributed with equal probability in each bin. The only outlier that stands out in the histogram is 35 through 40 with a distribution of only 21, while the others range from 67 to 79. The shape of this histogram is not skewed in any direction, proving that there is an equal chance for each bin.
+
+b) **Create boxplots for the five white numbers (i.e., Low, Second, Third, Fourth, High), with all of the plots displayed horizontally on the same set of axes for comparison. Include descriptive axis labels and a title, as well as appropriate labels for the boxplots. What shape does each variable have? Are there any outliers? Be sure to cite evidence from the plots to support your answers.**
+
+```{r}
+low     <- LotteryPowerballA$Low
+second  <- LotteryPowerballA$Second
+third   <- LotteryPowerballA$Third
+fourth  <- LotteryPowerballA$Fourth
+high    <- LotteryPowerballA$High
+
+boxplot(low, second, third, fourth, high,
+        main    = "POWERBALL LOTTERY NUMBERS",
+        ylab    = "NUMBER PICKED",
+        xlab    = "WHITE NUMBER",
+        names   = c("LOW", "SECOND", "THIRD", "FOURTH", "HIGH"),
+        col     = c("paleturquoise3", "aquamarine3", "plum3", "ivory3", "coral"))
+```
+
+The shape of the Five White Number is unimodal left-skewed. There is only one peak and that is at "high" and the tail is at "low" if we are visualizing the shape. All of the White Numbers have outliers that show up as "bubbles" on the histogram above. These pieces of data lay outside of the variability of the variable. You can see how far away the "bubbles" are from the median for each variable.
+
+c) **Give the way the lottery drawing works, why does it make sense mathematically/statistically that the variables would have the distribution shapes you described in (b)?**
+
+The shape makes sense in the histogram because each drawing's five white numbers have been sorted from the smallest to the largest. The variability within each variable are going to correspond to the label of the variable; hence, the variable 'high' has higher numbers within the variability than the variable 'low'.
+
+***
+## Problem 3
+***
+
+a) **How many students are included in the sample? How many are male and how many are female?**
+
+```{r}
+addmargins(table(PersonalitySTT3850$Gender))
+```
+
+139 students are in the sample, 108 of which are male, and the remaining 31 are female.
+
+b) **What majors are represented? Create a relative frequency table that sorts the majors from largest to smallest and then make a bar chart to display this information. Include descriptive axis labels and a title.**
+
+The majors represented are Computer Science, Mathematics, Actuarial Science, and Other Majors, in descending order.
+
+```{r}
+barplot(sort(prop.table(table(PersonalitySTT3850$Major)), decreasing = TRUE),
+        main    = "MAJORS WITHIN STT3850", 
+        ylab    = "FREQUENCY", 
+        xlab    = "MAJOR", 
+        xlim    = c(0, 4),
+        ylim    = c(0, 1), 
+        col     = c("palevioletred2", "paleturquoise3", "plum3", "coral"))
+```
+
+c) **Which personality type is most common? What percentage of students reported this type? What percentage of students are included in the top three reported personality types?**
+
+INTJ is by far the most common, with a 30.9% rate. `r 30.9 + 11.5 + 10.1`% of students are in the three most commmon personality types. (30.9% + 11.5% + 10.1%)
+
+```{r}
+sort(round(100 * prop.table(table(PersonalitySTT3850$Type)), 1), decreasing = TRUE)
+```
+
+d) **Create a contingency table with Gender as rows and Major as columns. Show the counts of each major within each gender. Also, create a bar chart to display this information. Include descriptive axis labels and a title. Does the distribution of males and females within each major seem to differ? What evidence in the the table and/or graph supports your answer?**
+
+```{r}
+addmargins(table(PersonalitySTT3850$Gender, PersonalitySTT3850$Major))
+barplot((table(PersonalitySTT3850$Gender, PersonalitySTT3850$Major)),
+        main    = "MAJORS BY GENDER IN STT3850",
+        sub     = "FEMALE = PINK, MALE = BLUE",
+        ylab    = "FREQUENCY",
+        xlab    = "MAJOR",
+        xlim    = c(0, 4.3),
+        ylim    = c(0, 80),
+        col     = c("salmon", "paleturquoise3"))
+```
+
+Mathematics and Actuarial Science is roughly 50% females and 50% males, making those two majors very similar when it comes to distribution. However, Computer Science is completely dominated by males with 71 versus 1 female. Also, Other majors tend to be chosen by males in the sample. Overall, we can conclude that those who choose Computer Science for a major tend to be male, while each other Major represented is roughly evenly picked males and females. The exception to this is Other, but it has a 4 to 12 ratio, unlike the 1 to 71 ratio for Computer Science.
+
+e) **Create a contingency table with Type as rows and Gender as columns. Show the percentage of students who reported each type within each gender, with all values rounded to one decimal place. Does the distribution of personality types seem to differ between males and females? What evidence in the the table supports your answer?**
+
+```{r}
+round(100*prop.table(table(PersonalitySTT3850$Type, PersonalitySTT3850$Gender), 2), digits = 1)
+```
+
+There isn't much difference between males and females in regards to personality type. The two most worth noting are that females are much more likely to be INFJ, and males are more likely to be INTJ. However, neither of these are significant enough given the data size.
+
+f) **Based on the available data, name three ways in which students in STT3850 differ from students in STT1810.**
+
+1. In STT1810, there are more females that have the personality type of ENFJ and ESFJ.
+2. In STT1810, roughly 73% of females are 'Feeling' over 'Thinking', whereas in STT3850 51.6% of females are 'Feeling' over 'Thinking'.
+3. In STT1810, roughly 55% of males are 'Intuitive' over 'Sensing', whereas in STT3850 roughly 73% of males are 'Intuitive' over 'Sensing'.
+
+***
+## Problem 4
+***
+
+a) **Subset the data to exclude all cases from 1958 and 1959, leaving only the decades 1960s through the 2010's.**
+
+```{r}
+sub <- subset(MaunaLoaCO2, Year >= 1960 & Year <= 2014)
+```
+
+b) **Using the subsetted data, create boxplots of raw CO2 data by decade, with all of the plots displayed vertically on the same set of axes for comparison. Include descriptive axis labels and a title.**
+
+```{r}
+sixty    <- subset(sub, Decade == "1960s", select = CO2.raw, drop = T)
+seventy  <- subset(sub, Decade == "1970s", select = CO2.raw, drop = T)
+eighty   <- subset(sub, Decade == "1980s", select = CO2.raw, drop = T)
+ninty    <- subset(sub, Decade == "1990s", select = CO2.raw, drop = T)
+zeros    <- subset(sub, Decade == "2000s", select = CO2.raw, drop = T)
+tens     <- subset(sub, Decade == "2010s", select = CO2.raw, drop = T)
+
+boxplot(sixty, seventy, eighty, ninty, zeros, tens,
+        main     = "CO2 RAW BY DECADE",
+        ylab     = "C02 RAW",
+        xlab     = "DECADE",
+        names    = c("1960s", "1970s", "1980s", "1990s", "2000s", "2010s"),
+        col      = c("palevioletred2", "paleturquoise3", "aquamarine3", "plum3", "ivory3", "coral"))
+```
+
+c) **Has the amount of CO2 typically found in the atmosphere changed over time (i.e., decade to decade)? If so, how has it changed? Be sure to cite evidence from the plots and/or other relevant summary measures to support your answers. If you refer to a specific statistic in the boxplot (e.g., median), compute/report the actual value of that statistic.**
+
+Yes, the amount of CO2 in the atmosphere has increased at a linear rate. Every decade the C02 Raw increases by roughly 10 to 15 ppm. By comparison, in the 1960s the median of the C02 Raw was around 320 ppm, whereas in the 2010s the median of the CO2 Raw was roughly 390 ppm.
+
+d) **Has the variability in CO2 changed over time? Use appropriate evidence to support your answer, as in (c).**
+
+Overall, the variability has expanded over time within each categorical value (each decade), until the 2010s, where the variability decreases significantly compared to the 2000s. However, it is worth noting the sample only goes to 2014, we are only looking at 4 years within the 2010s decade as opposed to 10 years for all the other decades. The variability could very likely increase over the next six years. The box plot above for each decade shows how spread out the variability is.
